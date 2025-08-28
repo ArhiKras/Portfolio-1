@@ -32,10 +32,10 @@ def move_task(source, target): # функция перемещения зада�
     try:
         if source.tag_ranges("sel"): # проверка на выделение
             start_index = source.index("sel.first") # индекс начала выделения
-            end_index = source.index("self.end") # индекс конца выделения
-            task = source.get(start_index, end_index) # получить выделенный текст
+            end_index = source.index("sel.end") # индекс конца выделения
+            task = source.get(start_index, end_index).strip() # получить выделенный текст
             source.delete(start_index, end_index) # удаление выделения
-            target.insert("end", task + "\n") # добавление задачи в конец списка
+            target.insert("end", task + "\n") # Вставляем без добавления лишнего переноса строки
         else:
             cursor_pos = source.index("insert")  # получает позицию курсора
             line_start = cursor_pos.split('.')[0] + '.0'  # начало строки, на которой находится курсор
@@ -83,11 +83,11 @@ btn_frame = ctk.CTkFrame(root, fg_color="transparent")
 btn_frame.pack(pady=5)
 
 # кнопки поля ввода
-add_task_button = ctk.CTkButton(btn_frame, text="Добавить задачу", corner_radius=20, command=add_task)
-add_task_button.pack(row=0, column=0, padx=10)
+add_task_button = ctk.CTkButton(btn_frame, text="Добавить задачу", command=add_task, corner_radius=20)
+add_task_button.grid(row=0, column=0, padx=10)
 
-delete_button = ctk.CTkButton(btn_frame, text="Удалить задачу", corner_radius=20,command=del_task)
-delete_button.pack(row=0, column=1, padx=10)
+delete_button = ctk.CTkButton(btn_frame, text="Удалить задачу", command=del_task, corner_radius=20)
+delete_button.grid(row=0, column=1, padx=10)
 
 # контейнер для списков/досок
 frame = ctk.CTkFrame(root, fg_color="transparent")
