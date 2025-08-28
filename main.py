@@ -1,7 +1,63 @@
 import customtkinter as ctk
 from tkinter import messagebox # всплывающие окна с сообщениями
 
-from code import add_task, add_task_button, delete_button, create_task_box
+def add_task(): # функция ввода задачи
+    task = task_entry.get().strip() # получает текст из поля ввода и удаляет пробелы по краям
+    if task: # проверка на пустую строку
+        free_list.insert("end", task + "\n") # добавление задачи в конец списка
+        task_entry.delete(0, "end") # очистка поля ввода
+    else:
+        messagebox.showwarning("Ошибка", "Введите задачу в поле ввода") # всплывающая ошибка при пустом вводе
+
+def del_task(): # функция удаления задачи
+    for box in (free_list, process_list, done_list):
+        try:
+            if box.tag_ranges("sel"): # проверка на выделение
+                start_index = box.index("sel.first") # индекс начала выделения
+                end_index = box.index("sel.end") # индекс конца выделения
+                box.delete(start_index, end_index) # удаление выделения
+                break
+            else: # если нет выделения, работает с позицией курсора
+                cursor_pos = box.index("insert") # получает позицию курсора
+                line_start = cursor_pos.split('.')[0] + '.0' # начало строки, на которой находится курсор
+                line_end = cursor_pos.split('.')[0] + ".end" # конец строки, на которой находится курсор
+                task = box.get(line_start, line_end).strip() # получить выделение начала/конца
+                if task:
+                    box.delete(line_start, line_end) # удалить выделение
+                    break
+        except Exception:
+            continue
+
+def move_task(source, target): # функция перемещения задачи
+    try:
+        if source.tag_ranges("sel"): # проверка на выделение
+            start_index = source.index("sel.first") # индекс начала выделения
+            end_index = source.index("self.end") # индекс конца выделения
+            task = source.get(start_index, end_index) # получить выделенный текст
+            source.delete(start_index, end_index) # удаление выделения
+            target.insert("end", task + "\n") # добавление задачи в конец списка
+        else:
+            cursor_pos = source.index("insert")  # получает позицию курсора
+            line_start = cursor_pos.split('.')[0] + '.0'  # начало строки, на которой находится курсор
+            line_end = cursor_pos.split('.')[0] + ".end"  # конец строки, на которой находится курсор
+            task = source.get(line_start, line_end).strip()  # получить выделение начала/конца
+            if task:
+                source.delete(line_start, line_end)
+                target.insert("end", task + "\n")
+    except Exception:
+        pass
+
+def create_task_box(parent, bg_color): # функция создания и оформления текстового поля
+    box = ctk.CTkTextbox(parent, # создание текстового поля
+                         height=200,
+                         width=220,
+                         corner_radius=15,
+                         fg_color=bg_color,
+                         border_width=2,
+                         border_color="black",
+                         font=("Arial", 12),
+                         wrap="word")
+    return box
 
 # интерфейс: выбор темы из библиотеки customtkinter
 ctk.set_appearance_mode("light") # главная тема
@@ -15,7 +71,7 @@ root.minsize(700,400)
 root.configure(fg_color="#F5F5F5") # замена дефолтной темы light на #F5F5F5
 
 # заголовок
-label_title = ctk.CTkLabel(root, text="Введите задачу:", font=("Arial", 14, Bold))
+label_title = ctk.CTkLabel(root, text="Введите задачу:", font=("Arial", 14, "bold"))
 label_title.pack(pady=5)
 
 # поле ввода
@@ -27,10 +83,10 @@ btn_frame = ctk.CTkFrame(root, fg_color="transparent")
 btn_frame.pack(pady=5)
 
 # кнопки поля ввода
-add_task_button = ctk.CTkButton(btn_frame, text="Добавить задачу", corner_radius=20,)
+add_task_button = ctk.CTkButton(btn_frame, text="Добавить задачу", corner_radius=20, command=add_task)
 add_task_button.pack(row=0, column=0, padx=10)
 
-delete_button = ctk.CTkButton(btn_frame, text="Удалить задачу", corner_radius=20,)
+delete_button = ctk.CTkButton(btn_frame, text="Удалить задачу", corner_radius=20,command=del_task)
 delete_button.pack(row=0, column=1, padx=10)
 
 # контейнер для списков/досок
